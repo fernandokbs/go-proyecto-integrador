@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	l "github.com/fernandokbs/goimage/internal/logger"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -23,12 +24,19 @@ func indexHandler(c *gin.Context) {
 }
 
 func uploadHandler(c *gin.Context) {
-	file, err := c.FormFile("image")
+	type UploadInput struct {
+		Action string                `form:"action" binding:"required"`
+		File   *multipart.FileHeader `form:"image" binding:"required"`
+	}
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no file"})
+	var input UploadInput
+
+	if err := c.ShouldBind(&input); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
+
+	file := input.File
 
 	l.LogInfo("Se ha cargado archivo", map[string]interface{}{
 		"file": file.Filename,

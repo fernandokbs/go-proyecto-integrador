@@ -67,16 +67,7 @@
       const file = imageInput.files[0];
       const action = document.getElementById('actionSelect').value;
 
-      if (!file) {
-        alert("Por favor sube una imagen primero.");
-        return;
-      }
-
-      if (!action) {
-        alert("Selecciona una acción.");
-        return;
-      }
-
+   
       const formData = new FormData();
       formData.append("image", file);
       formData.append("action", action);
