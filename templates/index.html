@@ -77,6 +77,22 @@
         return;
       }
 
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("action", action);
+
+      fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(`Servidor respondió: ${JSON.stringify(data)}`);
+      })
+      .catch(err => {
+        console.error("Error:", err);
+      });
+      
       console.log("Imagen:", file.name);
       console.log("Acción seleccionada:", action);
 

@@ -11,7 +11,6 @@ func RegisterRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 	{
 		api.POST("/upload", uploadHandler)
-		api.GET("/images/:id", statusHandler)
 	}
 }
 
@@ -22,7 +21,7 @@ func indexHandler(c *gin.Context) {
 }
 
 func uploadHandler(c *gin.Context) {
-	file, err := c.FormFile("file")
+	file, err := c.FormFile("image")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "no file"})
 		return
@@ -37,10 +36,4 @@ func uploadHandler(c *gin.Context) {
 
 	// TODO: registrar en storage (SQLite o JSON)
 	c.JSON(http.StatusOK, gin.H{"message": "file uploaded", "path": path})
-}
-
-func statusHandler(c *gin.Context) {
-	id := c.Param("id")
-	// TODO: consultar storage para ver el estado
-	c.JSON(http.StatusOK, gin.H{"id": id, "status": "pending"})
 }
