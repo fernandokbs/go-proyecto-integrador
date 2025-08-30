@@ -11,19 +11,22 @@
   <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
     <h2 class="text-2xl font-bold text-gray-700 mb-4 text-center">Editor de Imágenes</h2>
 
+    <!-- Input de múltiples archivos -->
     <div class="mb-4">
-      <label class="block text-gray-600 mb-2 font-medium">Subir Imagen</label>
+      <label class="block text-gray-600 mb-2 font-medium">Subir Imágenes</label>
       <input 
         type="file" 
         id="imageInput" 
         accept="image/*"
+        multiple
         class="w-full border border-gray-300 rounded-lg p-2"
       >
     </div>
 
+    <!-- Contenedor de previews -->
     <div id="previewContainer" class="mb-4 hidden">
       <p class="text-gray-600 mb-2 font-medium">Vista Previa:</p>
-      <img id="previewImage" class="rounded-lg shadow-md max-h-60 mx-auto">
+      <div id="previewGrid" class="grid grid-cols-2 gap-2"></div>
     </div>
 
     <div class="mb-4">
@@ -39,38 +42,56 @@
     </div>
 
     <button 
-      onclick="processImage()"
+      onclick="processImages()"
       class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
     >
-      Procesar Imagen
+      Procesar Imágenes
     </button>
   </div>
 
   <script>
     const imageInput = document.getElementById('imageInput');
     const previewContainer = document.getElementById('previewContainer');
-    const previewImage = document.getElementById('previewImage');
+    const previewGrid = document.getElementById('previewGrid');
 
+    // Mostrar múltiples previews
     imageInput.addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          previewImage.src = e.target.result;
-          previewContainer.classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
+      previewGrid.innerHTML = ""; // limpiar previews anteriores
+      const files = event.target.files;
+
+      if (files.length > 0) {
+        previewContainer.classList.remove('hidden');
+        Array.from(files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.className = "rounded-lg shadow-md max-h-40 w-full object-cover";
+            previewGrid.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+      } else {
+        previewContainer.classList.add('hidden');
       }
     });
 
-    function processImage() {
-      const file = imageInput.files[0];
+    // Procesar múltiples imágenes
+    function processImages() {
+      const files = imageInput.files;
       const action = document.getElementById('actionSelect').value;
 
-   
+      if (files.length === 0) {
+        alert("Por favor selecciona al menos una imagen.");
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("image", file);
+      Array.from(files).forEach(file => {
+        formData.append("images[]", file); // enviar como array
+      });
       formData.append("action", action);
+      console.log(formData)
 
       fetch("/api/upload", {
         method: "POST",
@@ -83,11 +104,11 @@
       .catch(err => {
         console.error("Error:", err);
       });
-      
-      console.log("Imagen:", file.name);
+
+      console.log("Imágenes:", Array.from(files).map(f => f.name));
       console.log("Acción seleccionada:", action);
 
-      alert(`Procesando la imagen "${file.name}" con la acción: ${action}`);
+      alert(`Procesando ${files.length} imágenes con la acción: ${action}`);
     }
   </script>
 </body>

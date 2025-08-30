@@ -3,8 +3,9 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	l "github.com/fernandokbs/goimage/internal/logger"
-	"mime/multipart"
+	"github.com/fernandokbs/goimage/internal/images"
 	"net/http"
+	"time"
 )
 
 func RegisterRoutes(r *gin.Engine) {
@@ -17,35 +18,32 @@ func RegisterRoutes(r *gin.Engine) {
 }
 
 func indexHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"status": "ONLINE 🚀",
-	})
+	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
 
 func uploadHandler(c *gin.Context) {
-	type UploadInput struct {
-		Action string                `form:"action" binding:"required"`
-		File   *multipart.FileHeader `form:"image" binding:"required"`
+	form, _ := c.MultipartForm()
+	
+	files := form.File["images[]"]
+
+	for _, file := range files { 
+		l.LogInfo("Se ha cargado archivo", map[string]interface{}{
+			"file": file.Filename,
+		})
+		
+		path := "uploads/" + file.Filename
+		
+		if err := c.SaveUploadedFile(file, path); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot save file"})
+			return
+		}
+
+		processor, _ := images.NewProcessor(path)
+
+		processor.Watermark("PRUEBA DESDE ENDPOINT")
+
+		time.Sleep(2 * time.Second)
 	}
 
-	var input UploadInput
-
-	if err := c.ShouldBind(&input); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	file := input.File
-
-	l.LogInfo("Se ha cargado archivo", map[string]interface{}{
-		"file": file.Filename,
-	})
-
-	path := "uploads/" + file.Filename
-	if err := c.SaveUploadedFile(file, path); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot save file"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "file uploaded", "path": path})
+	c.JSON(http.StatusOK, gin.H{"message": "files uploaded"})
 }

@@ -48,24 +48,6 @@ func (p *ImageProcessor) Watermark(text string) (error) {
 	return p.Save(newImage)
 }
 
-func (p *ImageProcessor) Thumbnail() (error) {
-	options := bimg.Options{
-		Width:   200,
-		Height:  200,
-		Crop:    true, 
-		Quality: 90, 
-	}
-
-	newImage, err := bimg.NewImage(buffer).Process(options)
-	
-	if err != nil {
-		fmt.Println(err);
-		return err
-	}
-
-	return p.Save(newImage)
-}
-
 func (p *ImageProcessor) Save(newImage []byte) error {
 	localPath := filepath.Join("processed_files", filepath.Base(p.FileName))
 	return bimg.Write(localPath, newImage)
