@@ -26,6 +26,8 @@ func uploadHandler(c *gin.Context) {
 	
 	files := form.File["images[]"]
 
+	done := make(chan string, len(files))
+
 	for _, file := range files { 
 		l.LogInfo("Se ha cargado archivo", map[string]interface{}{
 			"file": file.Filename,
@@ -38,11 +40,33 @@ func uploadHandler(c *gin.Context) {
 			return
 		}
 
-		processor, _ := images.NewProcessor(path)
+		go func(p string) {
+			processor, err := images.NewProcessor(path)
 
-		processor.Watermark("PRUEBA DESDE ENDPOINT")
+			if err != nil {
+				l.LogInfo("Error procesando imagen", map[string]interface{}{
+					"file": p,
+					"error": err.Error(),
+				})
 
-		time.Sleep(2 * time.Second)
+				done <- p
+				return
+			}
+
+			processor.Watermark("PRUEBA DESDE ENDPOINT")
+
+			time.Sleep(2 * time.Second) // Para simular que el proceso toma timpo
+
+			l.LogInfo("Imagen procesada", map[string]interface{}{
+				"file": p,
+			})
+
+			done <- p
+		}(path)
+	}
+
+	for i := 0; i < len(files); i++ {
+		<-done
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "files uploaded"})
