@@ -11,7 +11,6 @@
   <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
     <h2 class="text-2xl font-bold text-gray-700 mb-4 text-center">Editor de Imágenes</h2>
 
-    <!-- Input de múltiples archivos -->
     <div class="mb-4">
       <label class="block text-gray-600 mb-2 font-medium">Subir Imágenes</label>
       <input 
@@ -23,7 +22,6 @@
       >
     </div>
 
-    <!-- Contenedor de previews -->
     <div id="previewContainer" class="mb-4 hidden">
       <p class="text-gray-600 mb-2 font-medium">Vista Previa:</p>
       <div id="previewGrid" class="grid grid-cols-2 gap-2"></div>
@@ -36,7 +34,6 @@
         class="w-full border border-gray-300 rounded-lg p-2"
       >
         <option value="">-- Seleccionar acción --</option>
-        <option value="resize">Resize</option>
         <option value="watermark">Agregar Marca de Agua</option>
       </select>
     </div>
@@ -47,6 +44,15 @@
     >
       Procesar Imágenes
     </button>
+
+    <div class="mb-4 mt-4">
+      <label class="block text-gray-600 mb-2 font-medium">
+        Descarga archivos procesados
+      </label>
+      <ul id="processedFilesList">
+        
+      </ul>
+    </div>
   </div>
 
   <script>
@@ -76,7 +82,18 @@
       }
     });
 
-    // Procesar múltiples imágenes
+    function displayProcessedFiles(files) {
+      const ul = document.getElementById("processedFilesList");
+      
+      ul.innerHTML = files.map(link => `
+        <li>
+          <a href="${link}" target="_blank" class="text-blue-500 hover:underline">
+            ${link}
+          </a>
+        </li>
+      `).join("");
+    }
+
     function processImages() {
       const files = imageInput.files;
       const action = document.getElementById('actionSelect').value;
@@ -88,7 +105,7 @@
 
       const formData = new FormData();
       Array.from(files).forEach(file => {
-        formData.append("images[]", file); // enviar como array
+        formData.append("images[]", file);
       });
       formData.append("action", action);
       console.log(formData)
@@ -99,16 +116,14 @@
       })
       .then(res => res.json())
       .then(data => {
-        alert(`Servidor respondió: ${JSON.stringify(data)}`);
+        displayProcessedFiles(data.files);
+        // alert(`Servidor respondió: ${JSON.stringify(data)}`);
       })
       .catch(err => {
         console.error("Error:", err);
       });
 
-      console.log("Imágenes:", Array.from(files).map(f => f.name));
-      console.log("Acción seleccionada:", action);
-
-      alert(`Procesando ${files.length} imágenes con la acción: ${action}`);
+      // alert(`Procesando ${files.length} imágenes con la acción: ${action}`);
     }
   </script>
 </body>

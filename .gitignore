@@ -1,3 +1,4 @@
 uploads/*
 processed_files/*
 *.log
+bin

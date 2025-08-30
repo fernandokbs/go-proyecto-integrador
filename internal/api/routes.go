@@ -6,6 +6,7 @@ import (
 	"github.com/fernandokbs/goimage/internal/images"
 	"net/http"
 	"time"
+	"fmt"
 )
 
 func RegisterRoutes(r *gin.Engine) {
@@ -15,6 +16,8 @@ func RegisterRoutes(r *gin.Engine) {
 	{
 		api.POST("/upload", uploadHandler)
 	}
+
+	r.Static("/files", "./processed_files")
 }
 
 func indexHandler(c *gin.Context) {
@@ -27,6 +30,8 @@ func uploadHandler(c *gin.Context) {
 	files := form.File["images[]"]
 
 	done := make(chan string, len(files))
+
+	var processedLinks []string
 
 	for _, file := range files { 
 		l.LogInfo("Se ha cargado archivo", map[string]interface{}{
@@ -66,8 +71,12 @@ func uploadHandler(c *gin.Context) {
 	}
 
 	for i := 0; i < len(files); i++ {
-		<-done
+		link := fmt.Sprintf("/files/%s", <-done)
+		processedLinks = append(processedLinks, link)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "files uploaded"})
+	c.JSON(http.StatusOK, gin.H{
+		"files": processedLinks,
+		"message": "files uploaded",
+	})
 }
