@@ -1,33 +1,47 @@
 package database
 
 import (
-    "gorm.io/gorm"
+	"os"
+	"fmt"
+	"gorm.io/gorm"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
+	"github.com/fernandokbs/goimage/internal/models"
+	log "github.com/fernandokbs/goimage/internal/logger"
 )
 
 var DB *gorm.DB
 
-func Connect() {
+func GetConnection() (*gorm.DB, error) {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Println("⚠️ No se encontró archivo .env, usando variables del sistema")
+		log.LogInfo("⚠️ No se encontró archivo .env, usando variables del sistema", nil)
 	}
 
 	dsn := os.Getenv("DATABASE_URL")
 	
 	if dsn == "" {
-		log.Fatal("❌ No se encontró la variable DATABASE_URL en el entorno")
+		log.LogError("❌ No se encontró la variable DATABASE_URL en el entorno", nil)
 	}
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Fatal("❌ Error al conectar a MySQL:", err)
+		return nil, err
 	}
 
-	// Aqui va la automigracion
+	return db, nil
+}
+
+func Connect() {
+	db, err := GetConnection()
+
+	if err != nil {
+		log.LogError("❌ Error al conectar a MySQL:", nil)
+	}
+
+	db.AutoMigrate(&models.Image{})
 	
-	fmt.Println("✅ Conectado a MySQL")
+	fmt.Println("✅ Conectado a MySQL", nil)
 }

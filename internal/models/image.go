@@ -4,4 +4,5 @@ import "gorm.io/gorm"
 
 type Image struct {
     gorm.Model
+    Url string
 }

@@ -2,3 +2,4 @@ uploads/*
 processed_files/*
 *.log
 bin
+.env
