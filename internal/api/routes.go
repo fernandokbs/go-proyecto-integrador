@@ -6,7 +6,7 @@ import (
 	"github.com/fernandokbs/goimage/internal/images"
 	"net/http"
 	"time"
-	"fmt"
+	_ "fmt"
 )
 
 func RegisterRoutes(r *gin.Engine) {
@@ -58,21 +58,20 @@ func uploadHandler(c *gin.Context) {
 				return
 			}
 
-			processor.Watermark("PRUEBA DESDE ENDPOINT")
+			url, _ := processor.Watermark("PRUEBA DESDE ENDPOINT")
 
 			time.Sleep(2 * time.Second) // Para simular que el proceso toma timpo
 
 			l.LogInfo("Imagen procesada", map[string]interface{}{
-				"file": p,
+				"file": url,
 			})
 
-			done <- p
+			done <- url
 		}(path)
 	}
 
 	for i := 0; i < len(files); i++ {
-		link := fmt.Sprintf("/files/%s", <-done)
-		processedLinks = append(processedLinks, link)
+		processedLinks = append(processedLinks, <-done)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
