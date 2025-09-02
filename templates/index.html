@@ -7,8 +7,23 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  
+  {{ if .imageRecords }}
+    <div class="mb-4 w-full max-w-md">
+      <h3 class="text-xl font-semibold text-gray-700 mb-2 text-center">Ultimas imágenes subidas</h3>
+      <div class="grid grid-cols-2 gap-2">
+        {{ range .imageRecords }}
+          <div class="border rounded-lg overflow-hidden">
+            <img src="{{ .Url }}" class="w-full h-32 object-cover">
+          </div>
+        {{ else }}
+          <p class="text-gray-500 text-center col-span-2">No hay imágenes subidas aún.</p>
+        {{ end }}
+      </div>
+    </div>
+  {{ end }}
 
-  <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
+  <div class="ml-4 bg-white shadow-lg rounded-2xl p-6 w-full max-w-md">
     <h2 class="text-2xl font-bold text-gray-700 mb-4 text-center">Editor de Imágenes</h2>
 
     <div class="mb-4">
