@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	l "github.com/fernandokbs/goimage/internal/logger"
 	"github.com/fernandokbs/goimage/internal/images"
+	"github.com/fernandokbs/goimage/internal/models"
+	"github.com/fernandokbs/goimage/internal/database"
 	"net/http"
 	"time"
 	_ "fmt"
@@ -21,7 +23,15 @@ func RegisterRoutes(r *gin.Engine) {
 }
 
 func indexHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", gin.H{})
+	db, _ := database.GetConnection() // Handle el error
+
+	var imageRecords []models.Image
+	
+	db.Find(&imageRecords)
+
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"imageRecords": imageRecords,
+	})
 }
 
 func uploadHandler(c *gin.Context) {
@@ -65,6 +75,10 @@ func uploadHandler(c *gin.Context) {
 			l.LogInfo("Imagen procesada", map[string]interface{}{
 				"file": url,
 			})
+
+			db, _ := database.GetConnection() // Handle el error
+
+			db.Create(&models.Image{Url: url})
 
 			done <- url
 		}(path)
