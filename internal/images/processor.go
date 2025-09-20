@@ -6,6 +6,7 @@ import (
 	"github.com/h2non/bimg"
 	"path/filepath"
 	log "github.com/fernandokbs/goimage/internal/logger"
+	"github.com/sirupsen/logrus"
 )
 
 type ImageProcessor struct {
@@ -54,7 +55,7 @@ func (p *ImageProcessor) Save(newImage []byte) (string, error) {
 	localPath := filepath.Join("processed_files", filepath.Base(p.FileName))
 
 	if err := bimg.Write(localPath, newImage); err != nil {
-		log.LogError("error guardando localmente: %w", map[string]interface{}{
+		log.LogError("error guardando localmente: %w", logrus.Fields{
 			"error": err,
 		})
 		return "", err
@@ -65,7 +66,7 @@ func (p *ImageProcessor) Save(newImage []byte) (string, error) {
 	url, err := s3Client.Upload(localPath, key)
 
 	if err != nil {
-		log.LogError("error subiendo a S3:", map[string]interface{}{
+		log.LogError("error subiendo a S3:", logrus.Fields{
 			"error": err,
 		})
 		return "", err

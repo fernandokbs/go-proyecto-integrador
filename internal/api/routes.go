@@ -6,6 +6,7 @@ import (
 	"github.com/fernandokbs/goimage/internal/images"
 	"github.com/fernandokbs/goimage/internal/models"
 	"github.com/fernandokbs/goimage/internal/database"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 	_ "fmt"
@@ -44,7 +45,7 @@ func uploadHandler(c *gin.Context) {
 	var processedLinks []string
 
 	for _, file := range files { 
-		l.LogInfo("Se ha cargado archivo", map[string]interface{}{
+		l.LogInfo("Se ha cargado archivo", logrus.Fields{
 			"file": file.Filename,
 		})
 		
@@ -59,7 +60,7 @@ func uploadHandler(c *gin.Context) {
 			processor, err := images.NewProcessor(path)
 
 			if err != nil {
-				l.LogInfo("Error procesando imagen", map[string]interface{}{
+				l.LogInfo("Error procesando imagen", logrus.Fields{
 					"file": p,
 					"error": err.Error(),
 				})
@@ -72,7 +73,7 @@ func uploadHandler(c *gin.Context) {
 
 			time.Sleep(2 * time.Second) // Para simular que el proceso toma timpo
 
-			l.LogInfo("Imagen procesada", map[string]interface{}{
+			l.LogInfo("Imagen procesada", logrus.Fields{
 				"file": url,
 			})
 

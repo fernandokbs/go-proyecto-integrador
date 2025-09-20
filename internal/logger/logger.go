@@ -17,20 +17,18 @@ func init() {
 	}
 	Logger.Out = file
 
-	// Formato de salida
 	Logger.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
 	})
 
-	// Nivel de log
-	Logger.SetLevel(log.DebugLevel) // INFO, ERROR, DEBUG, etc.
+	Logger.SetLevel(log.DebugLevel)
 }
 
 // Funciones helper
-func LogInfo(msg string, fields map[string]interface{}) {
+func LogInfo(msg string, fields log.Fields) {
 	Logger.WithFields(fields).Info(msg)
 }
 
-func LogError(msg string, fields map[string]interface{}) {
+func LogError(msg string, fields log.Fields) {
 	Logger.WithFields(fields).Error(msg)
 }
